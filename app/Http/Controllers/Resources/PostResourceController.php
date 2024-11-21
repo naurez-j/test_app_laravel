@@ -157,6 +157,6 @@ class PostResourceController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $post = $this->postService->deletePost($id);
     }
 }

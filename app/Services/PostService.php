@@ -45,8 +45,9 @@ class PostService
     /**
      * Delete a post.
      */
-    public function deletePost(Post $post)
+    public function deletePost(String $id)
     {
+        $post = $this->getPostById($id);
         return $post->delete();
     }
 }
