@@ -15,6 +15,18 @@ class PostService
     }
 
     /**
+     * Get a post by ID.
+     *
+     * @param int $id
+     * @return Post
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     */
+    public function getPostById(int $id): Post
+    {
+        return Post::findOrFail($id);
+    }
+
+    /**
      * Store a new post.
      */
     public function storePost(array $data)

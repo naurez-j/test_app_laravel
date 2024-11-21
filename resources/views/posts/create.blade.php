@@ -8,7 +8,9 @@
 </head>
 <body>
 
-    <form id="storePostForm" action="{{ route('posts.store') }}" method="POST">
+    <h1>ADD POST</h1>
+    <br><br>
+    <form id="storePostForm" action="{{ route('posts.store')}}" method="POST">
         @csrf
         <p>Title</p>
         <input type="text" name="title" id="title">

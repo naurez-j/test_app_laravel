@@ -47,7 +47,15 @@ class PostResourceController extends Controller
                 ->editColumn('is_liked', function ($post) {
                     return $post->is_liked ? 'Yes' : 'No';
                 })
-                ->rawColumns(['is_liked']) // Allow raw HTML if needed
+                ->addColumn('actions', function ($post) {
+                    return '<a href="' . route('posts.edit', $post->id) . '" class="btn btn-primary">Edit</a>
+                            <form action="' . route('posts.destroy', $post->id) . '" method="POST" style="display:inline;">
+                                ' . csrf_field() . '
+                                ' . method_field('DELETE').'
+                                <button type="submit" class="btn btn-danger" onclick="return confirm(\'Are you sure?\')">Delete</button>
+                            </form>';
+                })
+                ->rawColumns(['actions']) // Allow raw HTML for buttons
                 ->make(true);
         }
 
@@ -101,24 +109,48 @@ class PostResourceController extends Controller
      */
     public function show(string $id)
     {
-        return view('posts.edit');
+
     }
 
     /**
      * Show the form for editing the specified resource.
      */
+
+
     public function edit(string $id)
     {
-        //
+        $post = $this->postService->getPostById($id); // Assuming a getPostById method in PostService
+        return view('posts.edit', compact('post'));
     }
+
 
     /**
      * Update the specified resource in storage.
      */
     public function update(PostUpdateRequest $request, string $id)
     {
-        //
+        try {
+            // Validate the request
+            $validatedData = $request->validated();
+
+            // Retrieve the post using the service
+            $post = $this->postService->getPostById($id);
+
+            // Update the post using the service
+            $this->postService->updatePost($post, $validatedData);
+
+            // Flash a success message
+            session()->flash('success', 'Post updated successfully.');
+
+            // Redirect to the index or appropriate page
+            return redirect()->route('posts.index');
+        } catch (\Exception $e) {
+            // Handle errors and optionally log them
+            $error = config('app.debug') ? $e->getMessage() : 'Failed to update the post.';
+            return redirect()->back()->withErrors(['error' => $error]);
+        }
     }
+
 
     /**
      * Remove the specified resource from storage.
