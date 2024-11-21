@@ -27,25 +27,33 @@ class PostResourceController extends Controller
      */
     public function index(Request $request)
     {
+        // If the request is via AJAX (for DataTable)
         if ($request->ajax()) {
-            try {
-                $posts = $this->postService->getAllPosts();
+            $posts = $this->postService->getAllPosts()
+                ->when($request->input('title'), function ($query) use ($request) {
+                    $query->where('title', 'like', '%' . $request->input('title') . '%');
+                })
+                ->when($request->input('is_liked'), function ($query) use ($request) {
+                    $query->where('is_liked', $request->input('is_liked'));
+                });
 
-                // Ensure DataTables is being fed correctly formatted data
-                return DataTables::of($posts)
-                    ->addColumn('action', function ($row) {
-                        return '<a href="' . route('posts.edit', $row->id) . '" class="btn btn-sm btn-primary">Edit</a>';
-                    })
-                    ->make(true);
-            } catch (\Exception $e) {
-                // Log the error and send it as JSON for debugging
-                //Log::error('Error in DataTable: ' . $e->getMessage());
-                return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
-            }
+            return DataTables::of($posts)
+                ->editColumn('title', function ($post) {
+                    return $post->title;
+                })
+                ->editColumn('description', function ($post) {
+                    return $post->description;
+                })
+                ->editColumn('is_liked', function ($post) {
+                    return $post->is_liked ? 'Yes' : 'No';
+                })
+                ->rawColumns(['is_liked']) // Allow raw HTML if needed
+                ->make(true);
         }
 
         return view('posts.index');
     }
+
 
     /**
      * Show the form for creating a new resource.
