@@ -9,6 +9,7 @@ use App\Http\Requests\PostStoreRequest;
 use App\Http\Requests\PostUpdateRequest;
 use Illuminate\Support\Facades\DB;
 use Flasher\Laravel\Facade\Flasher;
+use Yajra\DataTables\Facades\DataTables;
 
 
 
@@ -24,10 +25,26 @@ class PostResourceController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(PostService $postService)
+    public function index(Request $request)
     {
-        $posts = $this->postService->getAllPosts();
-        return view('posts.index', compact('posts'));
+        if ($request->ajax()) {
+            try {
+                $posts = $this->postService->getAllPosts();
+
+                // Ensure DataTables is being fed correctly formatted data
+                return DataTables::of($posts)
+                    ->addColumn('action', function ($row) {
+                        return '<a href="' . route('posts.edit', $row->id) . '" class="btn btn-sm btn-primary">Edit</a>';
+                    })
+                    ->make(true);
+            } catch (\Exception $e) {
+                // Log the error and send it as JSON for debugging
+                //Log::error('Error in DataTable: ' . $e->getMessage());
+                return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+            }
+        }
+
+        return view('posts.index');
     }
 
     /**
@@ -76,7 +93,7 @@ class PostResourceController extends Controller
      */
     public function show(string $id)
     {
-        //
+        return view('posts.edit');
     }
 
     /**
