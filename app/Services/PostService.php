@@ -11,7 +11,7 @@ class PostService
      */
     public function getAllPosts()
     {
-        return Post::all();
+        return Post::query();
     }
 
     /**

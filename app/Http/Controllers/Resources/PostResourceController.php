@@ -21,22 +21,15 @@ class PostResourceController extends Controller
     {
         $this->postService = $postService;
     }
-
     /**
      * Display a listing of the resource.
      */
+
     public function index(Request $request)
     {
         // If the request is via AJAX (for DataTable)
         if ($request->ajax()) {
-            $posts = $this->postService->getAllPosts()
-                ->when($request->input('title'), function ($query) use ($request) {
-                    $query->where('title', 'like', '%' . $request->input('title') . '%');
-                })
-                ->when($request->input('is_liked'), function ($query) use ($request) {
-                    $query->where('is_liked', $request->input('is_liked'));
-                });
-
+            $posts = $this->postService->getAllPosts();
             return DataTables::of($posts)
                 ->editColumn('title', function ($post) {
                     return $post->title;
@@ -45,22 +38,18 @@ class PostResourceController extends Controller
                     return $post->description;
                 })
                 ->editColumn('is_liked', function ($post) {
-                    return $post->is_liked ? 'Yes' : 'No';
+                    return view('components.liked-component', compact('post'))->render();
                 })
                 ->addColumn('actions', function ($post) {
-                    return '<a href="' . route('posts.edit', $post->id) . '" class="btn btn-primary">Edit</a>
-                            <form action="' . route('posts.destroy', $post->id) . '" method="POST" style="display:inline;">
-                                ' . csrf_field() . '
-                                ' . method_field('DELETE').'
-                                <button type="submit" class="btn btn-danger" onclick="return confirm(\'Are you sure?\')">Delete</button>
-                            </form>';
+                    return view('components.actions', compact('post'))->render();
                 })
-                ->rawColumns(['actions']) // Allow raw HTML for buttons
+                ->rawColumns(['actions','is_liked']) // Allow raw HTML for buttons
                 ->make(true);
         }
 
         return view('posts.index');
     }
+
 
 
     /**
