@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Resources\PostResourceController;
+use App\Http\Controllers\Resources\UserController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -19,5 +20,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::resource('posts', PostResourceController::class);
+Route::resource('users', UserController::class);
+Route::get('/users/data', [UserController::class, 'getData'])->name('users.getData');
 
 require __DIR__.'/auth.php';

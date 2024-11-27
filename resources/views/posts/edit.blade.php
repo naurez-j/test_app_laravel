@@ -23,7 +23,6 @@
             {{ old('is_liked', $post->is_liked) ? 'checked' : '' }}>
         <label for="is_liked">Like this post</label>
         <button type="submit">Submit</button>
-
     </form>
 </body>
 
